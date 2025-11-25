@@ -5,7 +5,7 @@ public class Usuario {
     private String nombre;
     private String username;
     private String password;
-    private String rol;         // "Administrador" o "Empleado"
+    private String rol;  // "Administrador" o "Empleado"
 
 
     private Usuario(Builder builder) {
