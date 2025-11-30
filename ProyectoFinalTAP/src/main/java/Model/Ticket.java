@@ -15,8 +15,7 @@ public class Ticket {
         this.fechaSalida = builder.fechaSalida;
         this.montoTotal = builder.montoTotal;
 
-        // Lógica: Si el builder no tiene fecha (es nuevo), se AHORA.
-        // Si tiene fecha o viene de la BD, usa esa fecha.
+
         if (builder.fechaEntrada == null) {
             this.fechaEntrada = LocalDateTime.now();
         } else {
@@ -30,7 +29,6 @@ public class Ticket {
 
     public String getPlacaVehiculo() { return placaVehiculo; }
 
-    // La placa no suele cambiar, por eso a veces se omite el setter.
 
     public LocalDateTime getFechaEntrada() { return fechaEntrada; }
     public void setFechaEntrada(LocalDateTime fecha) { this.fechaEntrada = fecha; }
@@ -48,7 +46,7 @@ public class Ticket {
         private LocalDateTime fechaSalida;
         private double montoTotal;
 
-        // Constructor del Builder (Obligamos a tener al menos la Placa)
+
         public Builder(String placaVehiculo) {
             this.placaVehiculo = placaVehiculo;
         }

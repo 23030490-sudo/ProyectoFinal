@@ -53,11 +53,11 @@ public class Login {
         lblError.setStyle("-fx-text-fill: #dc3545; -fx-font-weight: bold;");
 
         btnLogin.setOnAction(e -> {
-          /*  if (txtUsuario.getText().equals("admin") && txtPass.getText().equals("1234")) {
-                // new MainView().mostrar(stage);
+           if (txtUsuario.getText().equals("admin") && txtPass.getText().equals("1234")) {
+                 new MainView().mostrar(stage);
             } else {
                 lblError.setText("Credenciales incorrectas");
-            }*/
+            }
         });
 
         VBox card = new VBox(15);
