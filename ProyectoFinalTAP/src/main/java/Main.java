@@ -1,14 +1,22 @@
+import DAO.ConexionBD;
+import DAO.UsuarioDAO;
+import Controller.LoginController;
 import View.Login;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import java.sql.Connection;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
         try {
-            Login login = new Login();
-            login.mostrar(primaryStage);
+
+            Connection connection = ConexionBD.getConnection();
+            UsuarioDAO usuarioDAO = new UsuarioDAO(connection);
+            Login loginView = new Login();
+            new LoginController(loginView, usuarioDAO);
+            loginView.mostrar(primaryStage);
 
         } catch (Exception e) {
             e.printStackTrace();
