@@ -6,6 +6,9 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import java.sql.Connection;
 
+
+import java.security.MessageDigest;
+
 public class Main extends Application {
 
     @Override

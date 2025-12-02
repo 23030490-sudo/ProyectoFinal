@@ -8,7 +8,7 @@ public class ConexionBD {
 
         private static final String URL = "jdbc:mysql://localhost:3306/estacionamiento_db";
         private static final String USUARIO = "root";
-        private static final String CLAVE = "admin";
+        private static final String CLAVE = "1234";
 
         public static Connection getConnection() throws SQLException {
             try {

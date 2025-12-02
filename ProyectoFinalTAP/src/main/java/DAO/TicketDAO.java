@@ -1,6 +1,8 @@
 package DAO;
 
 import Model.Ticket;
+import Model.Vehiculo;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 
@@ -13,8 +15,8 @@ public class TicketDAO {
     }
 
     public void crearTicket(Ticket ticket, String tipoVehiculoTexto, String marca, String modelo) throws SQLException {
-        String sqlEntrada = "INSERT INTO Entrada (fecha_hora_entrada, id_tarifa, id_espacio) VALUES (?, ?, ?)";
-        String sqlRelacion = "INSERT INTO Se_registra (placa, id_entrada) VALUES (?, ?)";
+        String sqlEntrada = "INSERT INTO entrada (fecha_hora_entrada, id_tarifa, id_espacio) VALUES (?, ?, ?)";
+        String sqlRelacion = "INSERT INTO se_registra (placa, id_entrada) VALUES (?, ?)";
 
         int idTarifaDefecto = 1;
         int idEspacioDefecto = 1;
@@ -64,9 +66,9 @@ public class TicketDAO {
 
     public Ticket buscarTicketActivo(String placa) throws SQLException {
         String sql = "SELECT e.id_entrada, e.fecha_hora_entrada, t.precio_por_hora " +
-                "FROM Entrada e " +
-                "JOIN Se_registra sr ON e.id_entrada = sr.id_entrada " +
-                "JOIN Tarifa t ON e.id_tarifa = t.id_tarifa " +
+                "FROM entrada e " +
+                "JOIN se_registra sr ON e.id_entrada = sr.id_entrada " +
+                "JOIN tarifa t ON e.id_tarifa = t.id_tarifa " +
                 "WHERE sr.placa = ? AND e.fecha_hora_salida IS NULL";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -85,7 +87,7 @@ public class TicketDAO {
     }
 
     public void registrarSalida(Ticket ticket) throws SQLException {
-        String sql = "UPDATE Entrada SET fecha_hora_salida = ?, total_pagado = ? WHERE id_entrada = ?";
+        String sql = "UPDATE entrada SET fecha_hora_salida = ?, total_pagado = ? WHERE id_entrada = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
@@ -99,9 +101,9 @@ public class TicketDAO {
     }
 
     public int contarVehiculosEnSitio(int idTipoVehiculo) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Entrada e " +
-                "JOIN Se_registra sr ON e.id_entrada = sr.id_entrada " +
-                "JOIN Vehiculo v ON sr.placa = v.placa " +
+        String sql = "SELECT COUNT(*) FROM entrada e " +
+                "JOIN se_registra sr ON e.id_entrada = sr.id_entrada " +
+                "JOIN vehiculo v ON sr.placa = v.placa " +
                 "WHERE e.fecha_hora_salida IS NULL AND v.id_tipo = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -114,7 +116,7 @@ public class TicketDAO {
     }
 
     public double sumarIngresosHoy() throws SQLException {
-        String sql = "SELECT SUM(total_pagado) FROM Entrada WHERE DATE(fecha_hora_salida) = CURDATE()";
+        String sql = "SELECT SUM(total_pagado) FROM entrada WHERE DATE(fecha_hora_salida) = CURDATE()";
 
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -125,7 +127,7 @@ public class TicketDAO {
     }
 
     private boolean existeVehiculo(String placa) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Vehiculo WHERE placa = ?";
+        String sql = "SELECT COUNT(*) FROM vehiculo WHERE placa = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, placa);
             try (ResultSet rs = ps.executeQuery()) {
@@ -145,7 +147,7 @@ public class TicketDAO {
         String marcaFinal = (marca == null || marca.isEmpty()) ? "Sin especificar" : marca;
         String modeloFinal = (modelo == null || modelo.isEmpty()) ? "Sin especificar" : modelo;
 
-        String sql = "INSERT INTO Vehiculo (placa, id_tipo, id_propietario, marca, modelo) VALUES (?, ?, 1, ?, ?)";
+        String sql = "INSERT INTO vehiculo (placa, id_tipo, id_propietario, marca, modelo) VALUES (?, ?, 1, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, placa);
@@ -156,12 +158,34 @@ public class TicketDAO {
         }
     }
 
+    public boolean registrarVehiculo(Vehiculo vehiculo) throws SQLException {
+        int idTipo = obtenerIdTipo(vehiculo.getTipo());
+        int idPropietario = obtenerIdPropietario(vehiculo.getPropietario());
+
+        if (idTipo == -1) {
+            throw new SQLException("El tipo de vehículo '" + vehiculo.getTipo() + "' no existe en la BD.");
+        }
+        if (idPropietario == -1) {
+            throw new SQLException("El propietario '" + vehiculo.getPropietario() + "' no está registrado.");
+        }
+
+        String sql = "INSERT INTO vehiculo (placa, id_tipo, id_propietario, marca, modelo) VALUES (?, ?, ?, NULL, NULL)";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, vehiculo.getPlaca());
+            ps.setInt(2, idTipo);
+            ps.setInt(3, idPropietario);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     public java.util.List<Ticket> listarHistorial(java.time.LocalDate inicio, java.time.LocalDate fin) throws SQLException {
         java.util.List<Ticket> lista = new java.util.ArrayList<>();
 
         String sql = "SELECT e.id_entrada, s.placa, e.fecha_hora_entrada, e.fecha_hora_salida, e.total_pagado " +
-                "FROM Entrada e " +
-                "JOIN Se_registra s ON e.id_entrada = s.id_entrada " +
+                "FROM entrada e " +
+                "JOIN se_registra s ON e.id_entrada = s.id_entrada " +
                 "WHERE e.fecha_hora_salida IS NOT NULL " +
                 "AND DATE(e.fecha_hora_salida) BETWEEN ? AND ? " +
                 "ORDER BY e.fecha_hora_salida DESC";
@@ -184,6 +208,29 @@ public class TicketDAO {
         }
         return lista;
     }
+
+    private int obtenerIdTipo(String descripcion) throws SQLException {
+        String sql = "SELECT id_tipo FROM tipo WHERE descripcion = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, descripcion);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id_tipo");
+            }
+        }
+        return -1;
+    }
+
+    private int obtenerIdPropietario(String nombrePropietario) throws SQLException {
+        String sql = "SELECT id_propietario FROM propietario WHERE nombre = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, nombrePropietario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id_propietario");
+            }
+        }
+        return -1;
+    }
+
     private void cerrarRecursos(Statement stmt, ResultSet rs) {
         try { if(rs!=null) rs.close(); if(stmt!=null) stmt.close(); } catch(Exception e){}
     }

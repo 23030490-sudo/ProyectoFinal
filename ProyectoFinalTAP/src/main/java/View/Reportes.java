@@ -10,16 +10,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.time.format.DateTimeFormatter;
-
 public class Reportes {
 
     private VBox view;
-
-
     private TableView<Ticket> tablaReportes;
     private DatePicker dpInicio, dpFin;
     private Label lblTotalGanancias, lblTotalAutos;
+    private Button btnFiltrar;
+    private Button btnPDF;
 
     public Reportes() {
         view = new VBox();
@@ -28,7 +26,6 @@ public class Reportes {
         view.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
         view.setMaxWidth(800);
         view.setAlignment(Pos.TOP_LEFT);
-
 
         Label lblTitulo = new Label("REPORTES Y MOVIMIENTOS");
         lblTitulo.setFont(Font.font("Segoe UI", FontWeight.BOLD, 22));
@@ -45,18 +42,16 @@ public class Reportes {
         Label lblHasta = new Label("Hasta:");
         dpFin = new DatePicker();
 
-        Button btnFiltrar = new Button("FILTRAR RESULTADOS");
+        btnFiltrar = new Button("FILTRAR RESULTADOS");
         btnFiltrar.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
 
         filtrosBox.getChildren().addAll(lblDe, dpInicio, lblHasta, dpFin, btnFiltrar);
-
 
         tablaReportes = new TableView<>();
         tablaReportes.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tablaReportes.setPrefHeight(300);
 
-
-        TableColumn<Ticket, String> colId = new TableColumn<>("ID Ticket");
+        TableColumn<Ticket, Integer> colId = new TableColumn<>("ID Ticket");
         colId.setCellValueFactory(new PropertyValueFactory<>("numeroTicket"));
 
         TableColumn<Ticket, String> colPlaca = new TableColumn<>("Placa");
@@ -70,7 +65,6 @@ public class Reportes {
 
         TableColumn<Ticket, Double> colTotal = new TableColumn<>("Total Pagado");
         colTotal.setCellValueFactory(new PropertyValueFactory<>("montoTotal"));
-
 
         colTotal.setCellFactory(tc -> new TableCell<Ticket, Double>() {
             @Override
@@ -86,7 +80,6 @@ public class Reportes {
         });
 
         tablaReportes.getColumns().addAll(colId, colPlaca, colEntrada, colSalida, colTotal);
-
 
         HBox resumenBox = new HBox(30);
         resumenBox.setAlignment(Pos.CENTER_RIGHT);
@@ -105,27 +98,44 @@ public class Reportes {
         HBox exportBox = new HBox();
         exportBox.setAlignment(Pos.CENTER);
 
-        Button btnPDF = new Button("EXPORTAR REPORTE (PDF)");
+        btnPDF = new Button("EXPORTAR REPORTE (PDF)");
         btnPDF.setStyle("-fx-background-color: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-cursor: hand;");
 
-
         exportBox.getChildren().add(btnPDF);
-
-
-        btnFiltrar.setOnAction(e -> {
-
-            System.out.println("Consultando base de datos...");
-        });
-
-        btnPDF.setOnAction(e -> {
-            System.out.println("Generando PDF...");
-        });
-
 
         view.getChildren().addAll(lblTitulo, separador, filtrosBox, tablaReportes, resumenBox, exportBox);
     }
 
     public VBox getView() {
         return view;
+    }
+
+    // Getters
+    public DatePicker getDpInicio() {
+        return dpInicio;
+    }
+
+    public DatePicker getDpFin() {
+        return dpFin;
+    }
+
+    public TableView<Ticket> getTablaReportes() {
+        return tablaReportes;
+    }
+
+    public Label getLblTotalGanancias() {
+        return lblTotalGanancias;
+    }
+
+    public Label getLblTotalAutos() {
+        return lblTotalAutos;
+    }
+
+    public Button getBtnFiltrar() {
+        return btnFiltrar;
+    }
+
+    public Button getBtnPDF() {
+        return btnPDF;
     }
 }
