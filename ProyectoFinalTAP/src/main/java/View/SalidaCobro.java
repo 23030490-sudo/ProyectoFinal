@@ -10,25 +10,30 @@ import javafx.scene.text.FontWeight;
 
 public class SalidaCobro {
 
-
     private VBox view;
 
 
-    private Label lblTicketId, lblEntrada, lblSalida, lblTiempo, lblTarifa, lblTotal;
-    private VBox tarjetaResumen;
-    private Button btnConfirmar;
     private TextField txtPlaca;
+    private Button btnBuscar;
+    private Button btnConfirmar;
+    private Button btnCancelar;
+    private VBox tarjetaResumen;
+
+
+    private Label lblTicketId;
+    private Label lblEntrada;
+    private Label lblSalida;
+    private Label lblTiempo;
+    private Label lblTarifa;
+    private Label lblTotal;
 
     public SalidaCobro() {
-
         view = new VBox();
-
         view.setPadding(new Insets(30));
         view.setSpacing(20);
         view.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
         view.setMaxWidth(600);
         view.setAlignment(Pos.TOP_LEFT);
-
 
         Label lblTitulo = new Label("PROCESAR SALIDA Y COBRO");
         lblTitulo.setFont(Font.font("Segoe UI", FontWeight.BOLD, 22));
@@ -47,7 +52,7 @@ public class SalidaCobro {
         txtPlaca.setPromptText("Ej. GTO-111-A");
         txtPlaca.setStyle("-fx-font-size: 14px; -fx-padding: 8; -fx-border-color: #bdc3c7; -fx-border-radius: 5;");
 
-        Button btnBuscar = new Button("BUSCAR");
+        btnBuscar = new Button("BUSCAR");
         btnBuscar.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8 20; -fx-background-radius: 5;");
 
         buscadorBox.getChildren().addAll(lblBuscar, txtPlaca, btnBuscar);
@@ -66,7 +71,6 @@ public class SalidaCobro {
         datosGrid.setHgap(20);
         datosGrid.setVgap(10);
 
-
         lblEntrada = agregarDato(datosGrid, "Entrada:", "--:--", 0);
         lblSalida = agregarDato(datosGrid, "Salida:", "--:-- (Actual)", 1);
         lblTiempo = agregarDato(datosGrid, "Tiempo Total:", "--", 2);
@@ -74,7 +78,6 @@ public class SalidaCobro {
 
         Separator sepTicket = new Separator();
         sepTicket.setPadding(new Insets(10, 0, 10, 0));
-
 
         HBox totalBox = new HBox(10);
         totalBox.setAlignment(Pos.CENTER);
@@ -86,7 +89,6 @@ public class SalidaCobro {
         lblTotal.setTextFill(Color.web("#2c3e50"));
 
         totalBox.getChildren().addAll(lblTotalTexto, lblTotal);
-
         tarjetaResumen.getChildren().addAll(lblTicketId, datosGrid, sepTicket, totalBox);
 
 
@@ -98,69 +100,64 @@ public class SalidaCobro {
         btnConfirmar.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 20; -fx-background-radius: 5; -fx-cursor: hand;");
         btnConfirmar.setDisable(true);
 
-        Button btnCancelar = new Button("CANCELAR");
+        btnCancelar = new Button("CANCELAR");
         btnCancelar.setStyle("-fx-background-color: #c0392b; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 12 20; -fx-background-radius: 5; -fx-cursor: hand;");
 
         accionesBox.getChildren().addAll(btnConfirmar, btnCancelar);
 
-
-        btnBuscar.setOnAction(e -> {
-            if (!txtPlaca.getText().isEmpty()) {
-                simularBusquedaExitosa();
-            }
-        });
-
-        btnCancelar.setOnAction(e -> {
-            limpiar();
-        });
-
-        btnConfirmar.setOnAction(e -> {
-
-            Alert alerta = new Alert(Alert.AlertType.INFORMATION);
-            alerta.setTitle("Pago Exitoso");
-            alerta.setHeaderText(null);
-            alerta.setContentText("El vehículo ha sido liberado correctamente.");
-            alerta.showAndWait();
-            limpiar();
-        });
-
-
         view.getChildren().addAll(lblTitulo, separador, buscadorBox, tarjetaResumen, accionesBox);
     }
 
-
-    public VBox getView() {
-        return view;
-    }
-
-
+    public VBox getView() { return view; }
 
     private Label agregarDato(GridPane grid, String titulo, String valorInicial, int fila) {
         Label lblT = new Label(titulo);
         lblT.setStyle("-fx-font-weight: bold; -fx-text-fill: #555;");
         Label lblV = new Label(valorInicial);
         lblV.setStyle("-fx-text-fill: #333;");
-
         grid.add(lblT, 0, fila);
         grid.add(lblV, 1, fila);
         return lblV;
     }
 
-    private void simularBusquedaExitosa() {
-        tarjetaResumen.setVisible(true);
-        btnConfirmar.setDisable(false);
 
-//      lblTicketId.setText("RESUMEN DEL TICKET #10245");
-//        lblEntrada.setText("10:00 AM");
-//        lblSalida.setText("12:00 PM (Actual)");
-//        lblTiempo.setText("2 Horas, 0 Minutos");
-//        lblTarifa.setText("$ 15.00 / hora");
-//        lblTotal.setText("$ 30.00 MXN");
+    public String getPlaca() { return txtPlaca.getText(); }
+    public Button getBtnBuscar() { return btnBuscar; }
+    public Button getBtnConfirmar() { return btnConfirmar; }
+    public Button getBtnCancelar() { return btnCancelar; }
+
+    public void mostrarResumen(boolean visible) {
+        tarjetaResumen.setVisible(visible);
+        btnConfirmar.setDisable(!visible);
     }
 
-    private void limpiar() {
+    public void setDatosResumen(int idTicket, String entrada, String salida, String tiempo, String tarifa, String total) {
+        lblTicketId.setText("RESUMEN DEL TICKET #" + idTicket);
+        lblEntrada.setText(entrada);
+        lblSalida.setText(salida);
+        lblTiempo.setText(tiempo);
+        lblTarifa.setText(tarifa);
+        lblTotal.setText(total);
+    }
+
+    public void limpiar() {
         txtPlaca.clear();
-        tarjetaResumen.setVisible(false);
-        btnConfirmar.setDisable(true);
+        mostrarResumen(false);
+    }
+
+    public void mostrarAlerta(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
+    }
+
+    public void mostrarError(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle("Error");
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }
